@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enhanced Job Matching Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Job Matching Platform</h1>
+        <p>Personalized job recommendations tailored to your skills and location.</p>
+    </header>
+
+    <main>
+        <section id="user-form">
+            <h2>Enter Skills</h2>
+            <input type="text" id="skills" placeholder="Enter skills" oninput="getJobRecommendations()" />
+
+            <h2>Location</h2>
+            <select id="location" onchange="getJobRecommendations()">
+                <option value="">Any location</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+            </select>
+
+            <h2>Time Posted</h2>
+            <select id="timePosted" onchange="getJobRecommendations()">
+                <option value="">Any time</option>
+                <option value="1">Last 24 hours</option>
+                <option value="7">Last week</option>
+                <option value="30">Last month</option>
+            </select>
+        </section>
+
+        <section id="job-recommendations">
+            <h2>Recommended Jobs for You</h2>
+            <div id="job-list" class="job-list"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AI-Enhanced Job Matching Platform. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

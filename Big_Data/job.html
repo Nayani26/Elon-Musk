@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enhanced Job Matching Platform</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; }
+        header { background-color: #4682B4; color: white; padding: 1.5em 0; text-align: center; }
+        main { padding: 2em; }
+        section { margin: 2em 0; }
+        h2 { color:#4682B4; }
+        .job-list { display: flex; flex-direction: column; gap: 1em; }
+        .job-item { padding: 1em; border: 1px solid #ddd; border-radius: 8px; }
+        #user-form input, #user-form select { margin: 0.5em 0; padding: 0.5em; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Job Matching Platform</h1>
+        <p>Personalized job recommendations tailored to your skills, location.</p>
+    </header>
+
+    <main>
+        <!-- User Input Section -->
+        <section id="user-form">
+            <h2>Enter Skills</h2>
+            <input type="text" id="skills" placeholder="Enter skills" oninput="getJobRecommendations()" />
+
+            <h2>Location</h2>
+            <select id="location" onchange="getJobRecommendations()">
+                <option value="">Any location</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+            </select>
+
+            <h2>Time Posted</h2>
+            <select id="timePosted" onchange="getJobRecommendations()">
+                <option value="">Any time</option>
+                <option value="1">Last 24 hours</option>
+                <option value="7">Last week</option>
+                <option value="30">Last month</option>
+            </select>
+        </section>
+
+        <!-- Job Recommendations Section -->
+        <section id="job-recommendations">
+            <h2>Recommended Jobs for You</h2>
+            <div id="job-list" class="job-list"></div>
+        </section>
+    </main>
+
+    <footer style="text-align: center; padding: 1em; background-color: #333; color: white;">
+        <p>&copy; 2024 AI-Enhanced Job Matching Platform. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Expanded mock job data with posting dates
+        const mockJobs = [
+            { title: 'Data Analyst', description: 'Analyze data to help make strategic decisions.', skills: 'data analysis, SQL, Python, Excel', location: 'India', postedDate: new Date('2024-11-01') },
+            { title: 'Full-Stack Developer', description: 'Develop end-to-end web applications.', skills: 'JavaScript, React, Node.js, MongoDB, CSS', location: 'USA', postedDate: new Date('2024-10-29') },
+            { title: 'Data Scientist', description: 'Build predictive models and data pipelines.', skills: 'Python, R, machine learning, data visualization', location: 'India', postedDate: new Date('2024-10-25') },
+            { title: 'DevOps Engineer', description: 'Automate and optimize CI/CD processes.', skills: 'Docker, Kubernetes, AWS, Jenkins', location: 'USA', postedDate: new Date('2024-10-20') },
+            { title: 'UI/UX Designer', description: 'Design user-friendly interfaces and experiences.', skills: 'Figma, Adobe XD, user research, prototyping', location: 'India', postedDate: new Date('2024-10-15') },
+            { title: 'Project Manager', description: 'Oversee project execution and team coordination.', skills: 'Agile, Scrum, project planning, communication', location: 'USA', postedDate: new Date('2024-10-10') },
+            { title: 'Marketing Specialist', description: 'Develop and implement marketing strategies.', skills: 'SEO, content marketing, social media, analytics', location: 'India', postedDate: new Date('2024-11-02') },
+            { title: 'Software Engineer', description: 'Write clean, maintainable code for applications.', skills: 'Java, C++, software development, debugging', location: 'USA', postedDate: new Date('2024-10-28') },
+            { title: 'Business Analyst', description: 'Analyze business needs and recommend solutions.', skills: 'business analysis, SQL, requirements gathering', location: 'India', postedDate: new Date('2024-10-31') },
+            { title: 'Cybersecurity Analyst', description: 'Protect systems from cyber threats.', skills: 'network security, risk assessment, incident response', location: 'USA', postedDate: new Date('2024-10-24') },
+            { title: 'Data Engineer', description: 'Design and build data infrastructure.', skills: 'ETL, SQL, Python, big data', location: 'India', postedDate: new Date('2024-10-23') },
+            { title: 'Sales Executive', description: 'Drive sales and build customer relationships.', skills: 'sales strategy, communication, negotiation', location: 'USA', postedDate: new Date('2024-11-03') },
+            { title: 'Content Writer', description: 'Create engaging content for digital platforms.', skills: 'writing, SEO, research, editing', location: 'India', postedDate: new Date('2024-10-22') },
+            { title: 'Database Administrator', description: 'Manage and optimize database systems.', skills: 'SQL, database design, performance tuning', location: 'USA', postedDate: new Date('2024-10-19') },
+            { title: 'Network Engineer', description: 'Design and maintain network systems.', skills: 'networking, troubleshooting, Cisco, TCP/IP', location: 'India', postedDate: new Date('2024-10-18') },
+            { title: 'Cloud Consultant', description: 'Help businesses adopt cloud technologies.', skills: 'AWS, Azure, cloud architecture', location: 'USA', postedDate: new Date('2024-10-17') },
+            { title: 'Product Manager', description: 'Lead product development and strategy.', skills: 'product management, market research, Agile', location: 'India', postedDate: new Date('2024-10-14') },
+            { title: 'Graphic Designer', description: 'Create visual content for branding and marketing.', skills: 'Adobe Illustrator, Photoshop, branding', location: 'USA', postedDate: new Date('2024-10-12') },
+            { title: 'SEO Specialist', description: 'Optimize website content for search engines.', skills: 'SEO, Google Analytics, keyword research', location: 'India', postedDate: new Date('2024-10-11') },
+            { title: 'Artificial Intelligence Engineer', description: 'Develop AI models and algorithms.', skills: 'Python, TensorFlow, machine learning', location: 'USA', postedDate: new Date('2024-10-08') },
+        ];
+
+        function getJobRecommendations() {
+            const skillsInput = document.getElementById('skills').value.toLowerCase().trim();
+            const locationInput = document.getElementById('location').value;
+            const timePostedInput = parseInt(document.getElementById('timePosted').value);
+
+            const keywords = skillsInput.split(',').map(keyword => keyword.trim()).filter(keyword => keyword);
+            const currentDate = new Date();
+
+            // Filter jobs based on keywords, location, and posting time
+            const recommendedJobs = mockJobs.filter(job => {
+                // Check if job matches any keyword
+                const matchesKeyword = keywords.length === 0 || keywords.some(keyword =>
+                    job.title.toLowerCase().includes(keyword) ||
+                    job.description.toLowerCase().includes(keyword) ||
+                    job.skills.toLowerCase().includes(keyword)
+                );
+
+                // Check if job location matches user input
+                const matchesLocation = !locationInput || job.location === locationInput;
+
+                // Check if job was posted within selected time frame
+                const matchesTimePosted = !timePostedInput || 
+                    (currentDate - job.postedDate) / (1000 * 60 * 60 * 24) <= timePostedInput;
+
+                return matchesKeyword && matchesLocation && matchesTimePosted;
+            });
+
+            displayJobs(recommendedJobs);
+        }
+
+        function displayJobs(jobs) {
+            const jobList = document.getElementById('job-list');
+            jobList.innerHTML = '';  // Clear previous job listings
+
+            if (jobs.length === 0) {
+                jobList.innerHTML = '<p>No job matches found for the entered criteria.</p>';
+                return;
+            }
+
+            jobs.forEach(job => {
+                const jobItem = document.createElement('div');
+                jobItem.className = 'job-item';
+                jobItem.innerHTML = `
+                    <strong>${job.title}</strong>
+                    <p>${job.description}</p>
+                    <p><em>Required Skills: ${job.skills}</em></p>
+                    <p><em>Location: ${job.location}</em></p>
+                    <p><em>Posted Date: ${job.postedDate.toDateString()}</em></p>
+                `;
+                jobList.appendChild(jobItem);
+            });
+        }
+    </script>
+
+</body>
+</html>
+
